@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MediaCapture and Streams API</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <header>
+        <h1>MediaRecorder</h1>
+    </header>
+    <main>
+        <p><button id="btnStart">START RECORDING</button><br/>
+        <button id="btnStop">STOP RECORDING</button></p>
+
+        <audio id="audio2" controls></audio>
+
+        <!-- could save to canvas and do image manipulation and saving too -->
+    </main>
+    <script>
+        //consts for sending data to the server
+        const uploadURL = "/test"
+
+
+
+
+
+        let constraintObj = {
+            audio: true,
+            video: false
+        };
+
+
+        //handle older browsers that might implement getUserMedia in some way
+        if (navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+            navigator.mediaDevices.getUserMedia = function(constraintObj) {
+                let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                }
+                return new Promise(function(resolve, reject) {
+                    getUserMedia.call(navigator, constraintObj, resolve, reject);
+                });
+            }
+        }else{
+            navigator.mediaDevices.enumerateDevices()
+            .then(devices => {
+                devices.forEach(device=>{
+                    console.log(device.kind.toUpperCase(), device.label);
+                    //, device.deviceId
+                })
+            })
+            .catch(err=>{
+                console.log(err.name, err.message);
+            })
+        }
+
+        navigator.mediaDevices.getUserMedia(constraintObj)
+        .then(function(mediaStreamObj) {
+        //     //connect the media stream to the first audio element
+        //     let audio = document.querySelector('audio2');
+        //     if ("srcObject" in audio) {
+        //         audio.srcObject = mediaStreamObj;
+        //     } else {
+        //         //old version
+        //         audio.src = window.URL.createObjectURL(mediaStreamObj);
+        //     }
+
+            // audio.onloadedmetadata = function(ev) {
+            //     //show in the video element what is being captured by the webcam
+            //     audio.play();
+            // };
+
+            //add listeners for saving video/audio
+            let start = document.getElementById('btnStart');
+            let stop = document.getElementById('btnStop');
+            let audioSave = document.getElementById('audio2');
+            let mediaRecorder = new MediaRecorder(mediaStreamObj);
+            let chunks = [];
+
+            start.addEventListener('click', (ev)=>{
+                mediaRecorder.start();
+                console.log(mediaRecorder.state);
+            })
+            stop.addEventListener('click', (ev)=>{
+                mediaRecorder.stop();
+                console.log(mediaRecorder.state);
+            });
+            mediaRecorder.ondataavailable = function(ev) {
+                chunks.push(ev.data);
+            }
+            mediaRecorder.onstop = (ev)=>{
+                let blob = new Blob(chunks, { 'type' : 'audio/wav' });
+                console.log("we are live");
+
+                const xhr = new XMLHttpRequest()
+                const data = new FormData()
+                data.append('audio_file', blob, 'my blob');
+                xhr.open('POST', uploadURL)
+                xhr.send(data)
+
+                chunks = [];
+                let audioURL = window.URL.createObjectURL(blob);
+                audioSave.src = audioURL;
+
+
+
+
+            }
+        }).catch(function(err) {
+            console.log(err.name, err.message);
+        });
+
+
+        /*********************************
+        getUserMedia returns a Promise
+        resolve - returns a MediaStream Object
+        reject returns one of the following errors
+        AbortError - generic unknown cause
+        NotAllowedError (SecurityError) - user rejected permissions
+        NotFoundError - missing media track
+        NotReadableError - user permissions given but hardware/OS error
+        OverconstrainedError - constraint video settings preventing
+        TypeError - audio: false, video: false
+        *********************************/
+    </script>
+</body>
+</html>
