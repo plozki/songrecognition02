@@ -1,0 +1,68 @@
+/* note to myself if you want ti see changes on the css
+you should clear chrome cache by pressing ctrl+shift+R */
+*{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+.banner{
+    background-image: linear-gradient(rgba(41, 1, 1, 0.75),rgba(32, 32, 32, 0.75))
+    , url(background02.png);
+    height: 950px;
+    background-position: center;
+    background-size: cover;
+    position: relative;
+}
+.recorder{
+    width: 213px;
+    height: 210px;
+    position: relative;
+    top:40%;
+    left: 43%;
+    animation-name: scalingAnimation;
+    animation-duration: 3.75s;
+    animation-iteration-count: infinite;
+    cursor: pointer;
+
+    /* transform: translate(-58%,-50%);
+    border: 3px solid green;
+     */
+}
+
+@keyframes scalingAnimation {
+    50% { transform: scale(1.15)}
+
+  }
+.content{
+    width: 100%;
+    position: absolute;
+    top: 20%;
+    right: 1.5%;
+    color: honeydew;
+    text-align: center;
+    letter-spacing: 3px;
+}
+.content h1{
+    font-size: 70px;
+}
+.buttons{
+    margin: 50px 10px;
+    border-radius: 25px;
+    width: 200px;
+    border: 2px solid rgb(255, 94, 36);
+    color: rgb(219, 207, 207);
+    padding: 15px 32px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(rgba(68, 68, 68, 0.7),rgba(68, 68, 68, 0.7));
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.buttons:hover{
+    background-color: rgb(255, 94, 36);
+    border: none;
+
+}
